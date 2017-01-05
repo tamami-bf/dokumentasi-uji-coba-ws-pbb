@@ -1,0 +1,119 @@
+\documentclass[pdftex,12pt, oneside]{article}
+
+%\usepackage[paperwidth=8.5in, paperheight=13in]{geometry} % Folio
+\usepackage[paperwidth=8.27in, paperheight=11.69in]{geometry} % A4
+
+\usepackage{makeidx}         % allows index generation
+\usepackage{graphicx}        % standard LaTeX graphics tool
+                             % when including figure files
+\usepackage[bottom]{footmisc}% places footnotes at page bottom
+\usepackage[english]{babel}
+\usepackage{enumerate}
+\usepackage{paralist}
+\usepackage{float}
+\usepackage{gensymb}  
+\usepackage{listings}
+\usepackage{color}
+\usepackage{mathtools} % atau \usepackage{amsmath}
+\renewcommand{\baselinestretch}{1.5}
+
+\newcommand{\HRule}{\rule{\linewidth}{0.5mm}}
+
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{backcolor}{rgb}{0.95,0.95,0.92}
+
+\lstdefinestyle{mystyle}{
+  backgroundcolor=\color{backcolor},
+  commentstyle=\color{codegreen},
+  keywordstyle=\color{magenta},
+  stringstyle=\color{codepurple},
+  basicstyle=\footnotesize,
+  breakatwhitespace=false,
+  breaklines=true,
+  captionpos=b,
+  keepspaces=true,
+  numbers=left,
+  numbersep=5pt,
+  showspaces=false,
+  showstringspaces=false,
+  showtabs=false,
+  tabsize=2
+}
+
+\lstset{style=mystyle}
+
+
+\begin{document}
+\sloppy % biar section ga melebar melewati kertas
+
+\begin{center}
+{\large LAPORAN PELAKSANAAN UJI COBA PROGRAM - WS PBB}
+\\[1cm]
+xx Januari 2017\\
+Priyanto Tamami, S.Kom.
+\end{center}
+
+%\frontmatter%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section{PENDAHULUAN}
+
+Pengujian program atau aplikasi yang dilakukan berupa \textit{unit testing} dan \textit{integration testing} menggunakan \textit{tools} yang sudah ada pada bahasa pemrograman Java yaitu JUnit.
+
+JUnit ini nantinya akan melakukan testing per unit pada tiap fungsi / \textit{method} yang membangun sistem aplikasi sehingga diharapkan tiap unit menghasilkan keluaran yang diharapkan.
+
+\section{OUTPUT PROGRAM}
+
+Karena menggunakan JUnit, maka keluarannya akan menghasilkan informasi \texttt{fail} dan \texttt{passed}.
+
+Kondisi pengujian seperti dijelaskan sebelumnya bahwa akan dilakukan dengan \textit{unit test} dan \textit{integration test}, rinciannya adalah sebagai berikut :
+
+\begin{enumerate}[A.]
+  \item \textit{Unit Test}
+  
+  \textit{Unit test} yang dilakukan akan dibagi berdasarkan kelas/objek yang terbentuk, berikut adalah nama \textit{file} yang melakukan \textit{unit test}, nama \textit{file} menunjukkan nama kelas/objek yang dilakukan \textit{unit test}.
+  
+  \begin{enumerate}[1.]
+    \item RootControllerTest
+    
+    Pengujian kelas/objek \texttt{RootController} adalah untuk memastikan bahwa \textit{request} yang masuk ke \textit{server} mendapatkan respon yang diinginkan seperti nilai yang tertera pada basis data. Kode untuk melakukan pengujian pada kelas/objek \texttt{RootController} ini adalah sebagai berikut :
+    
+    
+    
+    \item StoreProceduresDaoImplTest
+    \item PembayaranServicesImplTest
+    \item ReversalServicesImplTest
+    \item SpptServicesImplTest
+  \end{enumerate}
+  
+  \item \textit{Integration Test}
+  
+  \textit{Integration test} akan melakukan tugasnya untuk menguji apakah koneksi dengan sistem basis data berjalan sebagaimana yang diharapkan, \textit{integration test} yang dilakukan hanya akan dibagi menjadi 2 (dua) bagian, yaitu :
+  
+  \begin{enumerate}[1.]
+    \item HibernateConfigurationIT
+    \item ServicesIT
+  \end{enumerate}
+\end{enumerate}
+
+
+\section{KENDALA YANG DIHADAPI}
+
+Kendala yang dihadapi pada saat melakukan \textit{unit test} tidak ada, hanya saja pada saat melakukan \textit{integration test}, dibutuhkan basis data model agar basis data aslinya tidak terpengaruh oleh kondisi \textit{test} yang merubah nilai dari isi basis data.
+
+
+\section{KESALAHAN PROGRAM}
+
+Kesalahan program yang ditemukan selama pengujian adalah pada saat memverifikasi kode mata anggaran untuk penerimaan pajak bumi dan bangunan, keputusannya apakah penerimaan pokok pajak dipisahkan mata anggarannya dengan denda administrasi pajak daerah.
+
+
+\section{WAKTU PROSES UJI COBA}
+
+Untuk proses uji cobanya sendiri sangat cepat, hanya kurang dari 1 jam, karena cukup melakukan eksekusi pada seluruh unit yang ada di dalam sistem aplikasi, dan melakukan eksekusi pada beberapa unit \textit{integration test}.
+
+
+\end{document}
