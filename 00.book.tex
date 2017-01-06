@@ -412,9 +412,11 @@ public class RootControllerTest {
     \begin{figure}[H]
       \centering
       \includegraphics[width=1\textwidth]{./resources/01-root-controller-ut}
-      \caption{Hasil \textit{Unit Test} Untuk Kelas \texttt{RootController}
+      \caption{Hasil \textit{Unit Test} Untuk Kelas \texttt{RootController}}
       \label{fig:root-controller-ut}
     \end{figure}
+    
+    Dari hasil tersebut menunjukkan bahwa pengujian telah berhasil dilakukan.
     
     \item StoreProceduresDaoImplTest
     
@@ -722,6 +724,17 @@ public class StoreProceduresDaoImplTest {
     
     Karena kelas \texttt{StoreProceduresDao} berkomunikasi langsung dengan sistem basis data, tugas \textit{unit test} ini adalah melakukan pengujian bahwa proses yang dihasilkan sesuai dengan isi basis data tanpa menyentuh atau berhubungan dengan sistem basis data, oleh karena itu pengujian pada kelas/objek \texttt{StoreProceduresDaoImplTest} menggunakan \textit{mocking} untuk membuat data model.
     
+    Dari hasil pengujian tersebut, didapatkan hasil seperti terlihat pada gambar \ref{fig:sp-ut}
+    
+    \begin{figure}[H]
+      \centering
+      \includegraphics[width=1\textwidth]{./resources/02-sp-ut}
+      \caption{Hasil \textit{Unit Test} Pada Kelas \texttt{StoreProceduresDaoImpl}}
+      \label{fig:sp-ut}
+    \end{figure}
+    
+    Dari gambar tersebut menunjukkan bahwa hasil pengujian yang dilakukan berhasil sesuai dengan apa yang diharapkan.
+    
     \item PembayaranServicesImplTest
     
     Kelas/objek \texttt{PembayaranServicesImplTest} digunakan untuk melakukan pengujian pada kelas \texttt{PembayaranServicesImpl} yang menghubungkan bagian \textit{view} dan \textit{model} pada konsep MVC. Perlu dipastikan bahwa hasil dari pengambilan data pada sistem basis data diterima dengan benar oleh kelas/objek \texttt{RootController}, berikut adalah kode untuk melakukan \textit{unit testing} pada kelas \texttt{PembayaranServicesImplTest} :
@@ -887,6 +900,17 @@ public class PembayaranServicesImplTest {
     
     Seperti pada pengujian sebelumnya, pengujian kali ini pun tidak akan menggunakan data langsung dari sistem basis data, hanya dibuatkan modelnya sebagai simulasi.
     
+    Hasil dari pengujian di atas adalah seperti terlihat pada gambar \ref{fig:byr-service-ut} :
+    
+    \begin{figure}[H]
+      \centering
+      \includegraphics[width=1\textwidth]{./resources/03-byr-service-ut}
+      \caption{Hasil \textit{Unit Test} Untuk kelas PembayaranServicesImpl}
+      \label{fig:byr-service-ut}
+    \end{figure}
+    
+    Dari gambar di atas menunjukkan bahwa pengujian telah dilakukan dan memberikan hasil sesuai dengan yang diharapkan.
+    
     \item ReversalServicesImplTest
     
     Kelas \texttt{ReversalServicesImplTest} akan melakukan pengujian untuk kelas/objek \texttt{ReversalServicesImpl} yang menghubungkan antara kelas/objek \texttt{RootController} untuk fungsi reversal pembayaran. Berikut adalah kode lengkap dari kelas \texttt{ReversalServicesImplTest} :
@@ -1012,6 +1036,17 @@ public class ReversalServicesImplTest {
     
     \textit{Unit test} dilakukan untuk setiap skenario yang memungkinkan terjadinya aksi, sehingga kelas ini mampu untuk melakukan tugasnya sebagai penghubung antara kelas/objek \textit{view} dan kelas/objek \textit{model} untuk fungsi reversal pembayaran.
     
+    Hasil dari eksekusi kode di atas adalah seperti pada gambar \ref{fig:rev-service-ut} :
+    
+    \begin{figure}[H]
+      \centering
+      \includegraphics[width=1\textwidth]{./resources/04-rev-service-ut}
+      \caption{Hasil \textit{Unit Test} terhadap kelas \texttt{ReversalServicesImpl}}
+      \label{fig:rev-service-ut}
+    \end{figure}
+    
+    Terlihat bahwa pengujian terhadap kelas/objek \texttt{ReversalServicesImpl} berhasil sepenuhnya.
+    
     \item SpptServicesImplTest
     
     Kelas/objek ini akan melakukan \textit{unit test} pada kelas/objek \textit{SpptServicesImpl} untuk fungsi \textit{inquiry} data SPPT. Berikut adalah kode \textit{unit test} untuk kelas \texttt{SpptServicesImplTest} :
@@ -1116,6 +1151,17 @@ public class SpptServicesImplTest {
     \end{lstlisting}
     
     Pengujian kali ini pun menggunakan data model atau \textit{mock} untuk memastikan bahwa proses yang terjadi menghasilkan keluaran yang diinginkan.
+    
+    Hasil dari pengujian di atas adalah seperti terlihat pada gambar \ref{fig:inq-service-ut} :
+    
+    \begin{figure}[H]
+      \centering
+      \includegraphics[width=1\textwidth]{./resources/05-inq-service-ut}
+      \caption{Hasil \textit{Unit Test} untuk kelas \texttt{SpptServicesImpl}}
+      \label{fig:inq-service-ut}
+    \end{figure}
+    
+    Dari gambar tersebut di atas terlihat bahwa pengujian telah berhasil melakukan \textit{unit test} pada tiap kasus.
     
   \end{enumerate}
   
