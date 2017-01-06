@@ -407,10 +407,716 @@ public class RootControllerTest {
     
     Agar tidak mengganggu kondisi data pada sistem basis data yang berjalan, maka \textit{unit test} ini menggunakan data model sebagaimana disiapkan pada \textit{method} \texttt{init()}, kemudian datanya akan di \textit{mock} ke dalam \textit{service} yang menangani, seperti misalkan pada kasus \textit{inquiry} data SPPT, maka data model akan di \textit{mock} ke dalam objek \texttt{SpptServices}, yang apabila diujikan ada \textit{request} masuk melalui \textit{method} \texttt{getSppt}, maka seharusnya sistem akan menghasilkan data persis seperti apa yang telah di \textit{mock} ke dalam \textit{service}.
     
+    Hasil dari \textit{unit test} tersebut seperti terlihat pada gambar \ref{fig:root-controller-ut}
+    
+    \begin{figure}[H]
+      \centering
+      \includegraphics[width=1\textwidth]{./resources/01-root-controller-ut}
+      \caption{Hasil \textit{Unit Test} Untuk Kelas \texttt{RootController}
+      \label{fig:root-controller-ut}
+    \end{figure}
+    
     \item StoreProceduresDaoImplTest
+    
+    Pengujian pada kelas \texttt{StoreProceduresDaoImplTest} dilakukan untuk memastikan bahwa proses di dalam kelas \texttt{StoreProceduresDaoImpl} berjalan sebagaimana seharusnya.
+    
+    Kode pengujian untuk kelas \texttt{StoreProceduresDaoImpl} ini adalah sebagai berikut :
+    
+    \begin{lstlisting}
+package lab.aikibo.dao;
+
+import lab.aikibo.constant.StatusRespond;
+import lab.aikibo.model.*;
+import org.joda.time.DateTime;
+import org.junit.Before;
+import org.junit.Test;
+import org.mockito.Mock;
+import org.mockito.Mockito;
+
+import java.math.BigInteger;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.mockito.Mockito.when;
+
+/**
+ * Created by tamami.
+ */
+public class StoreProceduresDaoImplTest {
+
+    @Mock
+    private StoreProceduresDao spDao;
+
+    private StatusInq statusInq;
+    private StatusInq statusInqNihil;
+    private StatusInq statusInqError;
+    private Sppt sppt;
+
+    private StatusTrx statusTrxBerhasil;
+    private StatusTrx statusTrxNihil;
+    private StatusTrx statusTrxTerbayar;
+    private StatusTrx statusTrxBatal;
+    private StatusTrx statusTrxError;
+    private PembayaranSppt byrSppt;
+
+    private StatusRev statusRevBerhasil;
+    private StatusRev statusRevNihil;
+    private StatusRev statusRevGanda;
+    private StatusRev statusRevError;
+    private ReversalPembayaran revSppt;
+
+
+    @Before
+    public void init() {
+        spDao = Mockito.mock(StoreProceduresDaoImpl.class);
+
+        sppt = new Sppt("332901000100100010", "2013", "FULAN", "BREBES",
+                new BigInteger("10000"), new BigInteger("0"));
+        statusInq = new StatusInq(StatusRespond.APPROVED, "Data Ditemukan", sppt);
+        statusInqNihil = new StatusInq(StatusRespond.DATA_INQ_NIHIL, "Data Tidak Ditemukan", null);
+        statusInqError = new StatusInq(StatusRespond.DATABASE_ERROR, "Kesalahan DB", null);
+
+        byrSppt = new PembayaranSppt("332901000100100010","2013","KODE_NTPD","4.1.1.12.1",
+                new BigInteger("10000"), "4.1.1.12.2", new BigInteger("0"), "FULAN",
+                "BREBES");
+        statusTrxBerhasil = new StatusTrx(StatusRespond.APPROVED, "Transaksi Telah Tercatat", byrSppt);
+        statusTrxNihil = new StatusTrx(StatusRespond.JUMLAH_SETORAN_NIHIL, "Data Yang Diminta Tidak Ada",
+                null);
+        statusTrxTerbayar = new StatusTrx(StatusRespond.TAGIHAN_TELAH_TERBAYAR, "Tagihan Telah Terbayar", null);
+        statusTrxBatal = new StatusTrx(StatusRespond.JUMLAH_SETORAN_NIHIL, "Tagihan Telah Dibatalkan", null);
+        statusTrxError = new StatusTrx(StatusRespond.DATABASE_ERROR, "Kesalahan Server", null);
+
+        revSppt = new ReversalPembayaran("332901000100100010","2013","KODE_NTPD");
+        statusRevBerhasil = new StatusRev(StatusRespond.APPROVED, "Reversal Telah Berhasil Dilakukan", revSppt);
+        statusRevNihil = new StatusRev(StatusRespond.DATA_INQ_NIHIL, "Data Yang Diminta Tidak Ada",
+                null);
+        statusRevGanda = new StatusRev(StatusRespond.DATABASE_ERROR, "Data Transaksi Tercatat Ganda",
+                null);
+        statusRevError = new StatusRev(StatusRespond.DATABASE_ERROR, "Kesalahan Server",
+                null);
+    }
+
+    @Test
+    public void testInqBerhasil() {
+        when(spDao.getDataSppt("332901000100100010","2013", null))
+                .thenReturn(statusInq);
+
+        assertEquals(StatusRespond.APPROVED,
+                spDao.getDataSppt("332901000100100010","2013",null).getCode());
+        assertEquals("Data Ditemukan",
+                spDao.getDataSppt("332901000100100010","2013", null).getMessage());
+        assertEquals("332901000100100010",
+                spDao.getDataSppt("332901000100100010","2013", null).getSppt().getNop());
+        assertEquals("2013",
+                spDao.getDataSppt("332901000100100010","2013", null).getSppt().getThn());
+        assertEquals("FULAN",
+                spDao.getDataSppt("332901000100100010","2013", null).getSppt().getNama());
+        assertEquals("BREBES",
+                spDao.getDataSppt("332901000100100010","2013", null).getSppt().getAlamatOp());
+        assertEquals(new BigInteger("10000"),
+                spDao.getDataSppt("332901000100100010","2013", null).getSppt().getPokok());
+        assertEquals(new BigInteger("0"),
+                spDao.getDataSppt("332901000100100010","2013", null).getSppt().getDenda());
+    }
+
+    @Test
+    public void testInqNihil() {
+        when(spDao.getDataSppt("332901000100100010","2013",null))
+                .thenReturn(statusInqNihil);
+
+        assertEquals(StatusRespond.DATA_INQ_NIHIL,
+                spDao.getDataSppt("332901000100100010","2013",null).getCode());
+        assertEquals("Data Tidak Ditemukan",
+                spDao.getDataSppt("332901000100100010","2013", null).getMessage());
+        assertNull(spDao.getDataSppt("332901000100100010","2013", null).getSppt());
+    }
+
+    @Test
+    public void testInqError() {
+        when(spDao.getDataSppt("332901000100100010", "2013", null))
+                .thenReturn(statusInqError);
+
+        assertEquals(StatusRespond.DATABASE_ERROR,
+                spDao.getDataSppt("332901000100100010","2013", null).getCode());
+        assertEquals("Kesalahan DB",
+                spDao.getDataSppt("332901000100100010","2013", null).getMessage());
+        assertNull(spDao.getDataSppt("332901000100100010","2013",null).getSppt());
+    }
+
+    @Test
+    public void testTrxSukses() {
+        when(spDao.prosesPembayaran("332901000100100010","2013",
+                new DateTime(2016,12,19,10,0).toDate(), null))
+                .thenReturn(statusTrxBerhasil);
+
+        assertEquals(StatusRespond.APPROVED,
+                spDao.prosesPembayaran("332901000100100010","2013",
+                        new DateTime(2016,12,19,10,0).toDate(), null).getCode());
+        assertEquals("Transaksi Telah Tercatat",
+                spDao.prosesPembayaran("332901000100100010","2013",
+                        new DateTime(2016,12,19,10,0).toDate(), null).getMessage());
+        assertEquals("332901000100100010",
+                spDao.prosesPembayaran("332901000100100010","2013",
+                        new DateTime(2016,12,19,10,0).toDate(), null).getByrSppt().getNop());
+        assertEquals("2013",
+                spDao.prosesPembayaran("332901000100100010","2013",
+                        new DateTime(2016,12,19,10,0).toDate(), null).getByrSppt().getThn());
+        assertEquals("KODE_NTPD",
+                spDao.prosesPembayaran("332901000100100010","2013",
+                        new DateTime(2016,12,19,10,0).toDate(), null).getByrSppt().getNtpd());
+        assertEquals("4.1.1.12.1",
+                spDao.prosesPembayaran("332901000100100010","2013",
+                        new DateTime(2016,12,19,10,0).toDate(), null).getByrSppt()
+                        .getMataAnggaranPokok());
+        assertEquals(new BigInteger("10000"),
+                spDao.prosesPembayaran("332901000100100010","2013",
+                        new DateTime(2016,12,19,10,0).toDate(), null).getByrSppt()
+                        .getPokok());
+        assertEquals("4.1.1.12.2",
+                spDao.prosesPembayaran("332901000100100010","2013",
+                        new DateTime(2016,12,19,10,0).toDate(), null).getByrSppt()
+                        .getMataAnggaranSanksi());
+        assertEquals(new BigInteger("0"),
+                spDao.prosesPembayaran("332901000100100010","2013",
+                        new DateTime(2016,12,19,10,0).toDate(), null).getByrSppt().getSanksi());
+        assertEquals("FULAN",
+                spDao.prosesPembayaran("332901000100100010","2013",
+                        new DateTime(2016,12,19,10,0).toDate(), null).getByrSppt().getNamaWp());
+        assertEquals("BREBES",
+                spDao.prosesPembayaran("332901000100100010","2013",
+                        new DateTime(2016,12,19,10,0).toDate(), null).getByrSppt().getAlamatOp());
+    }
+
+    @Test
+    public void testTrxNihil() {
+        when(spDao.prosesPembayaran("332901000100100010","2013",
+                new DateTime(2016,12,19,10,0).toDate(), null))
+                .thenReturn(statusTrxNihil);
+
+        assertEquals(StatusRespond.JUMLAH_SETORAN_NIHIL,
+                spDao.prosesPembayaran("332901000100100010","2013",
+                        new DateTime(2016,12,19,10,0).toDate(), null).getCode());
+        assertEquals("Data Yang Diminta Tidak Ada",
+                spDao.prosesPembayaran("332901000100100010","2013",
+                        new DateTime(2016,12,19,10,0).toDate(), null).getMessage());
+        assertNull(spDao.prosesPembayaran("332901000100100010","2013",
+                new DateTime(2016,12,19,10,0).toDate(), null).getByrSppt());
+    }
+
+    @Test
+    public void testTrxTerbayar() {
+        when(spDao.prosesPembayaran("332901000100100010","2013",
+                new DateTime(2016,12,19,10,0).toDate(), null))
+                .thenReturn(statusTrxTerbayar);
+
+        assertEquals(StatusRespond.TAGIHAN_TELAH_TERBAYAR,
+                spDao.prosesPembayaran("332901000100100010","2013",
+                        new DateTime(2016,12,19,10,0).toDate(), null).getCode());
+        assertEquals("Tagihan Telah Terbayar",
+                spDao.prosesPembayaran("332901000100100010","2013",
+                        new DateTime(2016,12,19,10,0).toDate(), null).getMessage());
+        assertNull(spDao.prosesPembayaran("332901000100100010","2013",
+                        new DateTime(2016,12,19,10,0).toDate(), null).getByrSppt());
+    }
+
+    @Test
+    public void testTrxBatal() {
+        when(spDao.prosesPembayaran("332901000100100010","2013",
+                new DateTime(2016,12,19,10,0).toDate(), null))
+                .thenReturn(statusTrxBatal);
+
+        assertEquals(StatusRespond.JUMLAH_SETORAN_NIHIL,
+                spDao.prosesPembayaran("332901000100100010","2013",
+                        new DateTime(2016,12,19,10,00).toDate(),null).getCode());
+        assertEquals("Tagihan Telah Dibatalkan",
+                spDao.prosesPembayaran("332901000100100010","2013",
+                        new DateTime(2016,12,19,10,0).toDate(), null).getMessage());
+        assertNull(spDao.prosesPembayaran("332901000100100010","2013",
+                        new DateTime(2016,12,19,10,0).toDate(), null).getByrSppt());
+    }
+
+    @Test
+    public void testTrxError() {
+        when(spDao.prosesPembayaran("332901000100100010","2013",
+                new DateTime(2016,12,19,10,0).toDate(), null))
+                .thenReturn(statusTrxError);
+
+        assertEquals(StatusRespond.DATABASE_ERROR,
+                spDao.prosesPembayaran("332901000100100010","2013",
+                        new DateTime(2016,12,19,10,0).toDate(), null).getCode());
+        assertEquals("Kesalahan Server",
+                spDao.prosesPembayaran("332901000100100010","2013",
+                        new DateTime(2016,12,19,10,0).toDate(), null).getMessage());
+        assertNull(spDao.prosesPembayaran("332901000100100010","2013",
+                new DateTime(2016,12,19,10,0).toDate(), null).getByrSppt());
+    }
+
+    @Test
+    public void testRevSukses() {
+        when(spDao.reversalPembayaran("332901000100100010","2013","KODE_NTPD", null))
+                .thenReturn(statusRevBerhasil);
+
+        assertEquals(StatusRespond.APPROVED,
+                spDao.reversalPembayaran("332901000100100010","2013","KODE_NTPD", null).getCode());
+        assertEquals("Reversal Telah Berhasil Dilakukan",
+                spDao.reversalPembayaran("332901000100100010", "2013", "KODE_NTPD", null).getMessage());
+        assertEquals("332901000100100010",
+                spDao.reversalPembayaran("332901000100100010","2013", "KODE_NTPD", null)
+            .getRevPembayaran().getNop());
+        assertEquals("2013",
+                spDao.reversalPembayaran("332901000100100010","2013","KODE_NTPD", null)
+                        .getRevPembayaran().getThn());
+        assertEquals("KODE_NTPD",
+                spDao.reversalPembayaran("332901000100100010","2013", "KODE_NTPD", null)
+                        .getRevPembayaran().getNtpd());
+
+    }
+
+    @Test
+    public void testRevNihil() {
+        when(spDao.reversalPembayaran("332901000100100010","2013","KODE_NTPD", null))
+                .thenReturn(statusRevNihil);
+
+        assertEquals(StatusRespond.DATA_INQ_NIHIL,
+                spDao.reversalPembayaran("332901000100100010","2013","KODE_NTPD", null)
+                        .getCode());
+        assertEquals("Data Yang Diminta Tidak Ada",
+                spDao.reversalPembayaran("332901000100100010","2013","KODE_NTPD", null)
+                        .getMessage());
+        assertNull(spDao.reversalPembayaran("332901000100100010","2013","KODE_NTPD", null)
+                .getRevPembayaran());
+    }
+
+    @Test
+    public void testRevDouble() {
+        when(spDao.reversalPembayaran("332901000100100010","2013","KODE_NTPD", null))
+                .thenReturn(statusRevGanda);
+
+        assertEquals(StatusRespond.DATABASE_ERROR,
+                spDao.reversalPembayaran("332901000100100010","2013","KODE_NTPD", null)
+                        .getCode());
+        assertEquals("Data Transaksi Tercatat Ganda",
+                spDao.reversalPembayaran("332901000100100010","2013","KODE_NTPD", null)
+                        .getMessage());
+        assertNull(spDao.reversalPembayaran("332901000100100010","2013","KODE_NTPD", null)
+                .getRevPembayaran());
+    }
+
+    @Test
+    public void testRevError() {
+        when(spDao.reversalPembayaran("332901000100100010","2013","KODE_NTPD", null))
+                .thenReturn(statusRevError);
+
+        assertEquals(StatusRespond.DATABASE_ERROR,
+                spDao.reversalPembayaran("332901000100100010","2013","KODE_NTPD", null)
+                        .getCode());
+        assertEquals("Kesalahan Server",
+                spDao.reversalPembayaran("332901000100100010","2013","KODE_NTPD",null)
+                        .getMessage());
+        assertNull(spDao.reversalPembayaran("332901000100100010","2013","KODE_NTPD",null)
+                .getRevPembayaran());
+    }
+
+}
+    \end{lstlisting}
+    
+    Karena kelas \texttt{StoreProceduresDao} berkomunikasi langsung dengan sistem basis data, tugas \textit{unit test} ini adalah melakukan pengujian bahwa proses yang dihasilkan sesuai dengan isi basis data tanpa menyentuh atau berhubungan dengan sistem basis data, oleh karena itu pengujian pada kelas/objek \texttt{StoreProceduresDaoImplTest} menggunakan \textit{mocking} untuk membuat data model.
+    
     \item PembayaranServicesImplTest
+    
+    Kelas/objek \texttt{PembayaranServicesImplTest} digunakan untuk melakukan pengujian pada kelas \texttt{PembayaranServicesImpl} yang menghubungkan bagian \textit{view} dan \textit{model} pada konsep MVC. Perlu dipastikan bahwa hasil dari pengambilan data pada sistem basis data diterima dengan benar oleh kelas/objek \texttt{RootController}, berikut adalah kode untuk melakukan \textit{unit testing} pada kelas \texttt{PembayaranServicesImplTest} :
+    
+    \begin{lstlisting}
+package lab.aikibo.services;
+
+import lab.aikibo.constant.StatusRespond;
+import lab.aikibo.dao.StoreProceduresDaoImpl;
+import lab.aikibo.model.PembayaranSppt;
+import lab.aikibo.model.StatusTrx;
+import org.joda.time.DateTime;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.springframework.test.context.junit4.SpringRunner;
+
+import java.math.BigInteger;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.mockito.Mockito.when;
+
+/**
+ * Created by tamami.
+ */
+@RunWith(SpringRunner.class)
+public class PembayaranServicesImplTest {
+
+    @InjectMocks
+    private PembayaranServicesImpl byrServices = new PembayaranServicesImpl();
+
+    @Mock
+    private StoreProceduresDaoImpl spDao;
+
+    private StatusTrx statusTrxBerhasil;
+    private StatusTrx statusTrxNihil;
+    private StatusTrx statusTrxTerbayar;
+    private StatusTrx statusTrxBatal;
+    private StatusTrx statusTrxError;
+    private StatusTrx statusTrxhnPajakBukanAngka;
+    private StatusTrx statusTrxWaktuBayarLdWaktuCatat;
+    private PembayaranSppt byrSppt;
+
+    @Before
+    public void init() {
+        byrSppt = new PembayaranSppt("332901000100100010","2013","KODE_NTPD","4.1.1.12.1",
+                new BigInteger("10000"), "4.1.1.12.2", new BigInteger("0"), "FULAN",
+                "BREBES");
+        statusTrxBerhasil = new StatusTrx(StatusRespond.APPROVED, "Transaksi Telah Tercatat", byrSppt);
+        statusTrxNihil = new StatusTrx(StatusRespond.JUMLAH_SETORAN_NIHIL, "Data Yang Diminta Tidak Ada",
+                null);
+        statusTrxTerbayar = new StatusTrx(StatusRespond.TAGIHAN_TELAH_TERBAYAR, "Tagihan Telah Terbayar", null);
+        statusTrxBatal = new StatusTrx(StatusRespond.JUMLAH_SETORAN_NIHIL, "Tagihan Telah Dibatalkan", null);
+        statusTrxError = new StatusTrx(StatusRespond.DATABASE_ERROR, "Kesalahan Server", null);
+    }
+
+    @Test
+    public void testTrxBerhasil() {
+        when(spDao.prosesPembayaran("332901000100100010","2013",
+                new DateTime(2016,12,20,10,0).toDate(), null)).thenReturn(statusTrxBerhasil);
+
+        assertEquals(StatusRespond.APPROVED,
+                byrServices.prosesPembayaran("332901000100100010","2013",
+                        new DateTime(2016,12,20,10,0), null).getCode());
+        assertEquals("Transaksi Telah Tercatat",
+                byrServices.prosesPembayaran("332901000100100010","2013",
+                        new DateTime(2016,12,20,10,0), null).getMessage());
+        assertEquals("332901000100100010",
+                byrServices.prosesPembayaran("332901000100100010","2013",
+                        new DateTime(2016,12,20,10,0), null).getByrSppt().getNop());
+        assertEquals("2013",
+                byrServices.prosesPembayaran("332901000100100010","2013",
+                        new DateTime(2016,12,20,10,0), null).getByrSppt().getThn());
+        assertEquals("KODE_NTPD",
+                byrServices.prosesPembayaran("332901000100100010","2013",
+                        new DateTime(2016,12,20,10,0), null).getByrSppt().getNtpd());
+        assertEquals("4.1.1.12.1",
+                byrServices.prosesPembayaran("332901000100100010","2013",
+                        new DateTime(2016,12,20,10,0),null).getByrSppt().getMataAnggaranPokok());
+        assertEquals(new BigInteger("10000"),
+                byrServices.prosesPembayaran("332901000100100010","2013",
+                        new DateTime(2016,12,20,10,0),null).getByrSppt().getPokok());
+        assertEquals("4.1.1.12.2",
+                byrServices.prosesPembayaran("332901000100100010","2013",
+                        new DateTime(2016,12,20,10,0), null).getByrSppt().getMataAnggaranSanksi());
+        assertEquals(new BigInteger("0"),
+                byrServices.prosesPembayaran("332901000100100010","2013",
+                        new DateTime(2016,12,20,10,0), null).getByrSppt().getSanksi());
+        assertEquals("FULAN",
+                byrServices.prosesPembayaran("332901000100100010","2013",
+                        new DateTime(2016,12,20,10,0),null).getByrSppt().getNamaWp());
+        assertEquals("BREBES",
+                byrServices.prosesPembayaran("332901000100100010","2013",
+                        new DateTime(2016,12,20,10,0),null).getByrSppt().getAlamatOp());
+
+    }
+
+    @Test
+    public void testTrxNihil() {
+        when(spDao.prosesPembayaran("332901000100100010","2013",
+                new DateTime(2016,12,20,10,0).toDate(), null)).thenReturn(statusTrxNihil);
+
+        assertEquals(StatusRespond.JUMLAH_SETORAN_NIHIL,
+                byrServices.prosesPembayaran("332901000100100010","2013",
+                        new DateTime(2016,12,20,10,0), null).getCode());
+        assertEquals("Data Yang Diminta Tidak Ada",
+                byrServices.prosesPembayaran("332901000100100010","2013",
+                        new DateTime(2016,12,20,10,0), null).getMessage());
+        assertNull(byrServices.prosesPembayaran("332901000100100010","2013",
+                new DateTime(2016,12,20,10,0),null).getByrSppt());
+    }
+
+    @Test
+    public void testTrxTerbayar() {
+        when(spDao.prosesPembayaran("332901000100100010","2013",
+                new DateTime(2016,12,20,10,0).toDate(), null)).thenReturn(statusTrxTerbayar);
+
+        assertEquals(StatusRespond.TAGIHAN_TELAH_TERBAYAR,
+                byrServices.prosesPembayaran("332901000100100010","2013",
+                        new DateTime(2016,12,20,10,0),null).getCode());
+        assertEquals("Tagihan Telah Terbayar",
+                byrServices.prosesPembayaran("332901000100100010","2013",
+                        new DateTime(2016,12,20,10,0), null).getMessage());
+        assertNull(byrServices.prosesPembayaran("332901000100100010","2013",
+                new DateTime(2016,12,20,10,0), null).getByrSppt());
+    }
+
+    @Test
+    public void testTrxBatal() {
+        when(spDao.prosesPembayaran("332901000100100010","2013",
+                new DateTime(2016,12,20,10,0).toDate(), null)).thenReturn(statusTrxBatal);
+
+        assertEquals(StatusRespond.JUMLAH_SETORAN_NIHIL,
+                byrServices.prosesPembayaran("332901000100100010","2013",
+                        new DateTime(2016,12,20,10,0), null).getCode());
+        assertEquals("Tagihan Telah Dibatalkan",
+                byrServices.prosesPembayaran("332901000100100010","2013",
+                        new DateTime(2016,12,20,10,0),null).getMessage());
+        assertNull(byrServices.prosesPembayaran("332901000100100010","2013",
+                new DateTime(2016,12,20,10,0), null).getByrSppt());
+    }
+
+    @Test
+    public void testTrxError() {
+        when(spDao.prosesPembayaran("332901000100100010","2013",
+                new DateTime(2016,12,20,10,0).toDate(), null)).thenReturn(statusTrxError);
+
+        assertEquals(StatusRespond.DATABASE_ERROR,
+                byrServices.prosesPembayaran("332901000100100010","2013",
+                        new DateTime(2016,12,20,10,0), null).getCode());
+        assertEquals("Kesalahan Server",
+                byrServices.prosesPembayaran("332901000100100010","2013",
+                        new DateTime(2016,12,20,10,0), null).getMessage());
+        assertNull(byrServices.prosesPembayaran("332901000100100010","2013",
+                new DateTime(2016,12,20,10,0),null).getByrSppt());
+    }
+
+}
+    \end{lstlisting}
+    
+    Seperti pada pengujian sebelumnya, pengujian kali ini pun tidak akan menggunakan data langsung dari sistem basis data, hanya dibuatkan modelnya sebagai simulasi.
+    
     \item ReversalServicesImplTest
+    
+    Kelas \texttt{ReversalServicesImplTest} akan melakukan pengujian untuk kelas/objek \texttt{ReversalServicesImpl} yang menghubungkan antara kelas/objek \texttt{RootController} untuk fungsi reversal pembayaran. Berikut adalah kode lengkap dari kelas \texttt{ReversalServicesImplTest} :
+    
+    \begin{lstlisting}
+package lab.aikibo.services;
+
+import lab.aikibo.constant.StatusRespond;
+import lab.aikibo.dao.StoreProceduresDaoImpl;
+import lab.aikibo.model.ReversalPembayaran;
+import lab.aikibo.model.StatusRev;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.springframework.test.context.junit4.SpringRunner;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.mockito.Mockito.when;
+
+/**
+ * Created by tamami.
+ */
+@RunWith(SpringRunner.class)
+public class ReversalServicesImplTest {
+
+    @InjectMocks
+    private ReversalServicesImpl revServices = new ReversalServicesImpl();
+
+    @Mock
+    private StoreProceduresDaoImpl spDao;
+
+    private StatusRev statusRevBerhasil;
+    private StatusRev statusRevNihil;
+    private StatusRev statusRevGanda;
+    private StatusRev statusRevError;
+    private ReversalPembayaran revSppt;
+
+    @Before
+    public void init() {
+        revSppt = new ReversalPembayaran("332901000100100010","2013","KODE_NTPD");
+        statusRevBerhasil = new StatusRev(StatusRespond.APPROVED, "Reversal Telah Berhasil Dilakukan", revSppt);
+        statusRevNihil = new StatusRev(StatusRespond.DATA_INQ_NIHIL, "Data Yang Diminta Tidak Ada",
+                null);
+        statusRevGanda = new StatusRev(StatusRespond.DATABASE_ERROR, "Data Transaksi Tercatat Ganda",
+                null);
+        statusRevError = new StatusRev(StatusRespond.DATABASE_ERROR, "Kesalahan Server",
+                null);
+    }
+
+    @Test
+    public void testRevBerhasil() {
+        when(spDao.reversalPembayaran("332901000100100010","2013","KODE_NTPD", null))
+                .thenReturn(statusRevBerhasil);
+
+        assertEquals(StatusRespond.APPROVED,
+                revServices.prosesReversal("332901000100100010","2013","KODE_NTPD",null).getCode());
+        assertEquals("Reversal Telah Berhasil Dilakukan",
+                revServices.prosesReversal("332901000100100010","2013","KODE_NTPD", null).getMessage());
+        assertEquals("332901000100100010",
+                revServices.prosesReversal("332901000100100010","2013","KODE_NTPD",null)
+                        .getRevPembayaran().getNop());
+        assertEquals("2013",
+                revServices.prosesReversal("332901000100100010","2013","KODE_NTPD",null)
+                        .getRevPembayaran().getThn());
+        assertEquals("KODE_NTPD",
+                revServices.prosesReversal("332901000100100010","2013","KODE_NTPD",null)
+                        .getRevPembayaran().getNtpd());
+    }
+
+    @Test
+    public void testRevNihil() {
+        when(spDao.reversalPembayaran("332901000100100010","2013","KODE_NTPD",null))
+                .thenReturn(statusRevNihil);
+
+        assertEquals(StatusRespond.DATA_INQ_NIHIL,
+                revServices.prosesReversal("332901000100100010","2013","KODE_NTPD",null)
+                        .getCode());
+        assertEquals("Data Yang Diminta Tidak Ada",
+                revServices.prosesReversal("332901000100100010","2013","KODE_NTPD",null)
+                        .getMessage());
+        assertNull(revServices.prosesReversal("332901000100100010","2013","KODE_NTPD",null)
+                .getRevPembayaran());
+    }
+
+    @Test
+    public void testRevGanda(){
+        when(spDao.reversalPembayaran("332901000100100010","2013","KODE_NTPD",null))
+                .thenReturn(statusRevGanda);
+
+        assertEquals(StatusRespond.DATABASE_ERROR,
+                revServices.prosesReversal("332901000100100010","2013","KODE_NTPD",null)
+                        .getCode());
+        assertEquals("Data Transaksi Tercatat Ganda",
+                revServices.prosesReversal("332901000100100010","2013","KODE_NTPD",null)
+                        .getMessage());
+        assertNull(revServices.prosesReversal("332901000100100010","2013","KODE_NTPD",null)
+                        .getRevPembayaran());
+    }
+
+    /**
+     * @TODO: buat unit test untuk skenario reversal gagal karena kesalahan DB
+     */
+    @Test
+    public void testRevError() {
+        when(spDao.reversalPembayaran("332901000100100010","2013","KODE_NTPD",null))
+                .thenReturn(statusRevError);
+
+        assertEquals(StatusRespond.DATABASE_ERROR,
+                revServices.prosesReversal("332901000100100010","2013","KODE_NTPD",null)
+                        .getCode());
+        assertEquals("Kesalahan Server",
+                revServices.prosesReversal("332901000100100010","2013","KODE_NTPD", null)
+                        .getMessage());
+        assertNull(revServices.prosesReversal("332901000100100010","2013","KODE_NTPD",null)
+                        .getRevPembayaran());
+    }
+
+}   
+    \end{lstlisting}
+    
+    \textit{Unit test} dilakukan untuk setiap skenario yang memungkinkan terjadinya aksi, sehingga kelas ini mampu untuk melakukan tugasnya sebagai penghubung antara kelas/objek \textit{view} dan kelas/objek \textit{model} untuk fungsi reversal pembayaran.
+    
     \item SpptServicesImplTest
+    
+    Kelas/objek ini akan melakukan \textit{unit test} pada kelas/objek \textit{SpptServicesImpl} untuk fungsi \textit{inquiry} data SPPT. Berikut adalah kode \textit{unit test} untuk kelas \texttt{SpptServicesImplTest} :
+    
+    \begin{lstlisting}
+package lab.aikibo.services;
+
+import lab.aikibo.constant.StatusRespond;
+import lab.aikibo.dao.StoreProceduresDaoImpl;
+import lab.aikibo.model.Sppt;
+import lab.aikibo.model.StatusInq;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.springframework.test.context.junit4.SpringRunner;
+
+import java.math.BigInteger;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.mockito.Mockito.when;
+
+/**
+ * Created by tamami.
+ */
+@RunWith(SpringRunner.class)
+public class SpptServicesImplTest {
+
+    @InjectMocks
+    private SpptServicesImpl spptServices = new SpptServicesImpl();
+
+    @Mock
+    private StoreProceduresDaoImpl spDao;
+
+    private StatusInq statusSukses;
+    private StatusInq statusInqGagalDataTidakAda;
+    private StatusInq statusInqError;
+    private Sppt sppt;
+
+    @Before
+    public void init() {
+        sppt = new Sppt("332901000100100010", "2013", "FULAN", "BREBES",
+                new BigInteger("10000"), new BigInteger("0"));
+        statusSukses = new StatusInq(1, "Data Ditemukan", sppt);
+        statusInqGagalDataTidakAda = new StatusInq(StatusRespond.DATA_INQ_NIHIL, "Data Tidak Ditemukan", null);
+        statusInqError = new StatusInq(StatusRespond.DATABASE_ERROR, "Kesalahan DB", null);
+    }
+
+    @Test
+    public void testInqSukses() {
+        when(spDao.getDataSppt("332901000100100010","2013",null)).thenReturn(statusSukses);
+
+        assertEquals(StatusRespond.APPROVED,
+                spptServices.getSpptByNopThn("332901000100100010","2013",null).getCode());
+        assertEquals("Data Ditemukan",
+                spptServices.getSpptByNopThn("332901000100100010","2013",null).getMessage());
+        assertEquals("332901000100100010",
+                spptServices.getSpptByNopThn("332901000100100010","2013",null).getSppt().getNop());
+        assertEquals("2013",
+                spptServices.getSpptByNopThn("332901000100100010","2013",null).getSppt().getThn());
+        assertEquals("FULAN",
+                spptServices.getSpptByNopThn("332901000100100010","2013",null).getSppt().getNama());
+        assertEquals("BREBES",
+                spptServices.getSpptByNopThn("332901000100100010","2013",null).getSppt().getAlamatOp());
+        assertEquals(new BigInteger("10000"),
+                spptServices.getSpptByNopThn("332901000100100010","2013",null).getSppt().getPokok());
+        assertEquals(new BigInteger("0"),
+                spptServices.getSpptByNopThn("332901000100100010","2013",null).getSppt().getDenda());
+    }
+
+    /**
+     * @TODO: unit testing untuk skenario inquiry nihil
+     */
+    @Test
+    public void testInqNihil() {
+        when(spDao.getDataSppt("332901000100100010","2013",null)).thenReturn(statusInqGagalDataTidakAda);
+
+        assertEquals(StatusRespond.DATA_INQ_NIHIL,
+                spptServices.getSpptByNopThn("332901000100100010","2013",null).getCode());
+        assertEquals("Data Tidak Ditemukan",
+                spptServices.getSpptByNopThn("332901000100100010","2013",null).getMessage());
+        assertNull(spptServices.getSpptByNopThn("332901000100100010","2013",null).getSppt());
+    }
+
+    /**
+     * @TODO: unit testing untuk skenario inquiry error server
+     */
+    @Test
+    public void testInqError() {
+        when(spDao.getDataSppt("332901000100100010","2013",null)).thenReturn(statusInqError);
+
+        assertEquals(StatusRespond.DATABASE_ERROR,
+                spptServices.getSpptByNopThn("332901000100100010","2013",null).getCode());
+        assertEquals("Kesalahan DB",
+                spptServices.getSpptByNopThn("332901000100100010","2013",null).getMessage());
+        assertNull(spptServices.getSpptByNopThn("332901000100100010","2013",null).getSppt());
+    }
+
+}
+    \end{lstlisting}
+    
+    Pengujian kali ini pun menggunakan data model atau \textit{mock} untuk memastikan bahwa proses yang terjadi menghasilkan keluaran yang diinginkan.
+    
   \end{enumerate}
   
   \item \textit{Integration Test}
@@ -419,7 +1125,191 @@ public class RootControllerTest {
   
   \begin{enumerate}[1.]
     \item HibernateConfigurationIT
+    
+    \textit{Integration test} yang dilakukan kelas ini hanya untuk memastikan parameter yang digunakan untuk melakukan koneksi ke sistem basis data sudah benar, karena parameter yang digunakan disimpan dalam bentuk \textit{file} terpisah. Berikut adalah kode untuk melakukan integrasi terhadap \textit{file} konfigurasi sistem basis data :
+    
+    \begin{lstlisting}
+package lab.aikibo.config;
+
+import com.jolbox.bonecp.BoneCPDataSource;
+import lab.aikibo.App;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.junit4.SpringRunner;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+
+/**
+ * Created by tamami.
+ */
+@RunWith(SpringRunner.class)
+@SpringBootTest(classes=App.class)
+public class HibernateConfigurationIT {
+
+    @Autowired
+    private BoneCPDataSource boneDS;
+
+    /**
+     * check driver
+     */
+    @Test
+    public void testDriver() {
+        assertEquals("oracle.jdbc.driver.OracleDriver", boneDS.getDriverClass());
+    }
+
+    /**
+     * check jdbc url
+     */
+    @Test
+    public void testJdbcDriver() {
+        assertEquals("jdbc:oracle:thin:pbbdummy/pbbdummy@192.168.2.7:1521/sismiopbck", boneDS.getJdbcUrl());
+    }
+
+    /**
+     * check db username
+     */
+    @Test
+    public void testUsername() {
+        assertEquals("pbbdummy", boneDS.getUsername());
+    }
+
+    /**
+     * check db password
+     */
+    @Test
+    public void testPassword() {
+        assertEquals("pbbdummy", boneDS.getPassword());
+    }
+
+    /**
+     * check db connection
+     */
+    @Test
+    public void testDbConnection() {
+        assertNotNull(boneDS);
+    }
+
+}
+    \end{lstlisting}
+    
+    Hasil keluaran dari \textit{integration test} untuk kelas \texttt{HibernateConfigurationIT} adalah seperti terlihat pada gambar \ref{fig:06-hibernate-config-it} :
+    
+    \begin{figure}[H]
+      \centering
+      \includegraphics[width=1\textwidth]{./resources/06-hibernate-config-IT}
+      \caption{Hasil \textit{Integration Test File} Konfigurasi Sistem Basis Data}
+      \label{fig:06-hibernate-config-it}
+    \end{figure}
+    
+    Terlihat bahwa dari 5 (lima) pengujian yang dilakukan sudah dapat memenuhi kualifikasi yang benar.
+    
     \item ServicesIT
+    
+    Kelas \texttt{ServicesIT} ini akan melakukan \textit{integration test} terhadap kelas \textit{services} yang hubungannya langsung melakukan aksesnya pada sistem basis data. Agar tidak mengganggu sistem yang sedang berjalan, sistem basis data pun menggunakan model data yang sama persis sebagaimana sistem basis data yang digunakan pada fase produksi, yaitu menggunakan sistem basis data Oracle 11g.
+    
+    Berikut adalah kode untuk melakukan pengujian tersebut :
+    
+    \begin{lstlisting}
+package lab.aikibo.services;
+
+import lab.aikibo.App;
+import lab.aikibo.constant.StatusRespond;
+import lab.aikibo.model.StatusInq;
+import lab.aikibo.model.StatusRev;
+import lab.aikibo.model.StatusTrx;
+import org.joda.time.DateTime;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.junit4.SpringRunner;
+
+import java.math.BigInteger;
+
+import static org.junit.Assert.assertEquals;
+
+/**
+ * Created by tamami.
+ */
+@RunWith(SpringRunner.class)
+@SpringBootTest(classes=App.class)
+public class ServicesIT {
+
+    @Autowired
+    private SpptServices spptServices;
+
+    @Autowired
+    private PembayaranServices byrServices;
+
+    @Autowired
+    private ReversalServices revServices;
+
+    @Test
+    public void testInquiry() {
+        StatusInq statusInq = spptServices.getSpptByNopThn("332901000100100010","2013","192.168.2.1");
+
+        assertEquals(StatusRespond.APPROVED, statusInq.getCode());
+        assertEquals("Data Ditemukan", statusInq.getMessage());
+        assertEquals("332901000100100010", statusInq.getSppt().getNop());
+        assertEquals("2013", statusInq.getSppt().getThn());
+        assertEquals("SUKARTA", statusInq.getSppt().getNama());
+        assertEquals("GUNUNGJAYA - SALEM", statusInq.getSppt().getAlamatOp());
+        assertEquals(new BigInteger("35750"), statusInq.getSppt().getPokok());
+        assertEquals(new BigInteger("0"), statusInq.getSppt().getDenda());
+    }
+
+    @Test
+    public void testTrx() {
+        StatusTrx statusTrx = byrServices.prosesPembayaran("332901000100100010","2013",
+                new DateTime(2016,12,20,10,0),null);
+
+        assertEquals(StatusRespond.APPROVED, statusTrx.getCode());
+        assertEquals("Pembayaran Telah Tercatat", statusTrx.getMessage());
+        assertEquals("332901000100100010", statusTrx.getByrSppt().getNop());
+        assertEquals("4.1.1.11.02", statusTrx.getByrSppt().getMataAnggaranPokok());
+        assertEquals(new BigInteger("35750"), statusTrx.getByrSppt().getPokok());
+        assertEquals("4.1.1.11.02", statusTrx.getByrSppt().getMataAnggaranSanksi());
+        assertEquals(new BigInteger("0"), statusTrx.getByrSppt().getSanksi());
+        assertEquals("SUKARTA", statusTrx.getByrSppt().getNamaWp());
+        assertEquals("GUNUNGJAYA - SALEM", statusTrx.getByrSppt().getAlamatOp());
+    }
+
+    @Test
+    public void testRev() {
+        StatusRev statusRev = revServices.prosesReversal("332901000100100010","2013",
+                "2016AA74516SB20050812", null);
+
+        assertEquals(StatusRespond.APPROVED, statusRev.getCode());
+        assertEquals("Proses Reversal Berhasil", statusRev.getMessage());
+        assertEquals("332901000100100010",statusRev.getRevPembayaran().getNop());
+        assertEquals("2013", statusRev.getRevPembayaran().getThn());
+        assertEquals("2016AA74516SB20050812", statusRev.getRevPembayaran().getNtpd());
+    }
+
+}
+    \end{lstlisting}
+    
+    Hasil dari pengujian kelas ini akan terlihat seperti pada gambar \ref{fig:services-it-fail}:
+    
+    \begin{figure}[H]
+      \centering
+      \includegraphics[width=1\textwidth]{./resources/07-services-it}
+      \caption{Hasil \textit{Integration Test} Dengan Sistem Basis Data}
+      \label{fig:services-it-fail}
+    \end{figure}
+    
+    Terlihat bahwa ada kegagalan pada saat melakukan \texttt{testRev}, ini dikarenakan kode \texttt{NTPD} tidak sesuai atau tercatat pada basis data, maka diperlukan penyesuaian terhadap parameter \texttt{NTPD} yang sudah tercatat pada basis data pada pencatatan transaksi pembayaran sebelumnya, pada gambar \ref{fig:services-it-success} adalah hasil \textit{integration test} ke-2 setelah dilakukan penyesuaian terhadap parameter \texttt{NTPD}.
+    
+    \begin{figure}[H]
+      \centering
+      \includegraphics[width=1\textwidth]{./resources/08-services-it-2}
+      \caption{Hasil \textit{Integration Test} Dengan Sistem Basis Data Ke-2}
+      \label{fig:services-it-success}
+    \end{figure}
+    
   \end{enumerate}
 \end{enumerate}
 
